@@ -23,20 +23,24 @@ type UserState struct {
 	StreamerStatus StreamerStatus
 }
 
+type ApiClient interface {
+	GetStreams(params *helix.StreamsParams) (*helix.StreamsResponse, error)
+}
+
 type Monitor struct {
 	*sync.Mutex
 	States     map[string]*UserState
-	Client     *helix.Client
+	Client     ApiClient
 	UserIds    []string
 	Interval   time.Duration
 	Context    context.Context
 	NotifyChan chan *UserState
 }
 
-func NewMonitor(helixClient *helix.Client, userIds []string, interval time.Duration, context context.Context, notifyChan chan *UserState) *Monitor {
+func NewMonitor(client ApiClient, userIds []string, interval time.Duration, context context.Context, notifyChan chan *UserState) *Monitor {
 	monitor := &Monitor{
 		Mutex:      &sync.Mutex{},
-		Client:     helixClient,
+		Client:     client,
 		UserIds:    userIds,
 		Interval:   interval,
 		Context:    context,
