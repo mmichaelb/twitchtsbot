@@ -119,3 +119,10 @@ func (monitor *Monitor) initializeStreamerStates(streams []helix.Stream) {
 		monitor.NotifyChan <- state
 	}
 }
+
+func (monitor *Monitor) GetState(id string) (*UserState, bool) {
+	monitor.Lock()
+	defer monitor.Unlock()
+	state, ok := monitor.States[id]
+	return state, ok
+}
