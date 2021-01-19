@@ -11,8 +11,6 @@ import (
 	"time"
 )
 
-var Log = logrus.StandardLogger()
-
 type StreamerStatus int
 
 const (
