@@ -13,14 +13,6 @@ import (
 	"time"
 )
 
-type mockApiClient struct {
-	*sync.Mutex
-	returnErr    bool
-	requestCount int
-	statusCode   int
-	streams      map[string]bool
-}
-
 func (client *mockApiClient) GetStreams(params *helix.StreamsParams) (*helix.StreamsResponse, error) {
 	if client.returnErr {
 		return nil, errors.New("internal client error")
