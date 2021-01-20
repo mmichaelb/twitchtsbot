@@ -2,7 +2,6 @@ package twitch
 
 import (
 	"context"
-	"errors"
 	"github.com/nicklaw5/helix"
 	"github.com/sirupsen/logrus"
 	"github.com/sirupsen/logrus/hooks/test"
@@ -15,7 +14,7 @@ import (
 
 func (client *mockApiClient) GetStreams(params *helix.StreamsParams) (*helix.StreamsResponse, error) {
 	if client.returnErr {
-		return nil, errors.New("internal client error")
+		return nil, internalClientError
 	}
 	client.requestCount++
 	client.Lock()

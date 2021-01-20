@@ -1,6 +1,11 @@
 package twitch
 
-import "sync"
+import (
+	"errors"
+	"sync"
+)
+
+var internalClientError = errors.New("internal client error")
 
 type mockApiClient struct {
 	*sync.Mutex
