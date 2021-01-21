@@ -3,7 +3,6 @@ package twitch
 import (
 	"context"
 	"github.com/nicklaw5/helix"
-	"github.com/sirupsen/logrus"
 	"github.com/sirupsen/logrus/hooks/test"
 	"github.com/stretchr/testify/assert"
 	"net/http"
@@ -12,64 +11,55 @@ import (
 	"time"
 )
 
-type mockStreamApiClient struct {
+type mockUserApiClient struct {
 	*sync.Mutex
 	returnErr    bool
 	requestCount int
 	statusCode   int
-	streams      map[string]bool
+	users        map[string]helix.User
 }
 
-func (client *mockStreamApiClient) GetStreams(params *helix.StreamsParams) (*helix.StreamsResponse, error) {
+func (client *mockUserApiClient) GetUsers(params *helix.UsersParams) (*helix.UsersResponse, error) {
 	if client.returnErr {
 		return nil, internalClientError
 	}
 	client.requestCount++
 	client.Lock()
 	defer client.Unlock()
-	resp := &helix.StreamsResponse{
+	resp := &helix.UsersResponse{
 		ResponseCommon: helix.ResponseCommon{
 			StatusCode: client.statusCode,
 		},
-		Data: helix.ManyStreams{
-			Streams: make([]helix.Stream, 0),
-		},
+		Data: helix.ManyUsers{},
 	}
-	if client.streams == nil {
+	if client.users == nil {
 		return resp, nil
 	}
-	for userId, live := range client.streams {
-		if !live {
-			continue
-		}
-		for _, paramUserId := range params.UserIDs {
-			if paramUserId == userId {
-				resp.Data.Streams = append(resp.Data.Streams, helix.Stream{UserID: userId})
+	for userId, user := range client.users {
+		for _, login := range params.Logins {
+			if login == userId {
+				resp.Data.Users = append(resp.Data.Users, user)
 			}
 		}
 	}
 	return resp, nil
 }
 
-func (client *mockStreamApiClient) updateStreamStatus(user string, live bool) {
-	client.Lock()
-	defer client.Unlock()
-	client.streams[user] = live
-}
-
-func TestMonitor_StartSingleStream(t *testing.T) {
-	mockClient := &mockStreamApiClient{
+func TestUser_RetrieveIDs(t *testing.T) {
+	mockClient := &mockUserApiClient{
 		Mutex:      &sync.Mutex{},
 		statusCode: http.StatusOK,
-		streams: map[string]bool{
-			"1": true,
+		users: map[string]helix.User{
+			"testuser": {ID: "1"},
 		},
 	}
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 	notifyChan := make(chan *UserState)
 	defer close(notifyChan)
-	monitor := NewMonitor(mockClient, []string{"1"}, time.Second, ctx, notifyChan)
+	ids, err := RetrieveIDs(mockClient, []string{"testuser"})
+	assert.Nil(t, err)
+	assert.Equal(t, []string{}, ids)
 	go monitor.Start()
 	assertStreamerStates(t, notifyChan, map[string]StreamerStatus{"1": StreamerStatusLive})
 	mockClient.updateStreamStatus("1", false)
@@ -160,23 +150,4 @@ func TestMonitor_StartClientError(t *testing.T) {
 	go monitor.Start()
 	waitForMonitorRequest(mockClient)
 	assert.Equal(t, logrus.ErrorLevel, hook.LastEntry().Level)
-}
-
-func waitForMonitorRequest(mockClient *mockStreamApiClient) {
-	// wait for monitor to request the first time
-	for i := 0; i < 10; i++ {
-		time.Sleep(time.Millisecond * 400)
-		if mockClient.requestCount >= 1 {
-			break
-		}
-	}
-}
-
-func assertStreamerStates(t *testing.T, notifyChan chan *UserState, statusMap map[string]StreamerStatus) {
-	for i := 0; i < len(statusMap); i++ {
-		state := <-notifyChan
-		expectedStatus, ok := statusMap[state.ID]
-		assert.Truef(t, ok, "unexpected user state from notifyChan: %s", state.ID)
-		assert.Equalf(t, expectedStatus, state.StreamerStatus, "unexpected streamer status from id %s", state.ID)
-	}
 }
