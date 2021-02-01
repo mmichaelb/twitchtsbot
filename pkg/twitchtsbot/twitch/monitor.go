@@ -23,10 +23,6 @@ type UserState struct {
 	StreamerStatus StreamerStatus
 }
 
-type ApiClient interface {
-	GetStreams(params *helix.StreamsParams) (*helix.StreamsResponse, error)
-}
-
 type Monitor struct {
 	*sync.Mutex
 	States     map[string]*UserState

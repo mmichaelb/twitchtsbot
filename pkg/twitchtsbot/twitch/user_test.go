@@ -14,7 +14,7 @@ var (
 )
 
 func TestRetrieveIDs(t *testing.T) {
-	client := new(userApiClient)
+	client := new(testApiClient)
 	response := defaultOkUsersResponse
 	response.Data = helix.ManyUsers{Users: []helix.User{{ID: "0"}}}
 	client.On("GetUsers", &defaultUserParams).Return(&response, nil)
@@ -25,7 +25,7 @@ func TestRetrieveIDs(t *testing.T) {
 }
 
 func TestRetrieveIDs_Error(t *testing.T) {
-	client := new(userApiClient)
+	client := new(testApiClient)
 	testErr := errors.New("test error")
 	client.On("GetUsers", &defaultUserParams).Return(nil, testErr)
 	ids, err := RetrieveIDs(client, []string{"testuser"})
@@ -35,7 +35,7 @@ func TestRetrieveIDs_Error(t *testing.T) {
 }
 
 func TestRetrieveIDs_InvalidStatusCode(t *testing.T) {
-	client := new(userApiClient)
+	client := new(testApiClient)
 	response := defaultOkUsersResponse
 	response.StatusCode = http.StatusInternalServerError
 	client.On("GetUsers", &defaultUserParams).Return(&response, nil)
