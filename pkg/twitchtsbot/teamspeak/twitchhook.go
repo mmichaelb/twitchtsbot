@@ -17,6 +17,18 @@ type TwitchUpdateHook struct {
 	ServerGroupId int
 }
 
+func NewHook(teamspeakHttpClient *ts3.TeamspeakHttpClient, monitor *twitch.Monitor, notifyChan chan *twitch.UserState,
+	ctx context.Context, userMapping map[int]string, serverGroupId int) *TwitchUpdateHook {
+	return &TwitchUpdateHook{
+		TsClient:      teamspeakHttpClient,
+		Monitor:       monitor,
+		NotifyChan:    notifyChan,
+		Ctx:           ctx,
+		UserMapping:   userMapping,
+		ServerGroupId: serverGroupId,
+	}
+}
+
 func (hook *TwitchUpdateHook) Start() error {
 	err := hook.TsClient.SubscribeEvent(ts3.NotifyClientEnterView, hook.enterClientHook)
 	if err != nil {
