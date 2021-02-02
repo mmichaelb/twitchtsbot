@@ -7,7 +7,7 @@ import (
 	"net/http"
 )
 
-func RetrieveIDs(client *helix.Client, names []string) ([]string, error) {
+func RetrieveIDs(client ApiClient, names []string) ([]string, error) {
 	Log.WithField("nameCount", len(names)).Debugln("Fetching Twitch User IDs...")
 	resp, err := client.GetUsers(&helix.UsersParams{
 		Logins: names,
