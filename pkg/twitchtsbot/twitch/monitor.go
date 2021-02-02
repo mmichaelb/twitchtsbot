@@ -53,16 +53,18 @@ func (monitor *Monitor) Start() {
 	defer func() {
 		Log.Infoln("Stopped Twitch stream monitor.")
 	}()
-	for {
-		select {
-		case <-time.After(monitor.Interval):
-			if err := monitor.updateUserStates(); err != nil {
-				Log.WithError(err).Errorln("Could not update streamer states!")
+	go func() {
+		for {
+			select {
+			case <-time.After(monitor.Interval):
+				if err := monitor.updateUserStates(); err != nil {
+					Log.WithError(err).Errorln("Could not update streamer states!")
+				}
+			case <-monitor.Context.Done():
+				return
 			}
-		case <-monitor.Context.Done():
-			return
 		}
-	}
+	}()
 }
 
 func (monitor *Monitor) updateUserStates() error {
