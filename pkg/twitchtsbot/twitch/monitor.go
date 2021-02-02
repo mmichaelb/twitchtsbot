@@ -67,8 +67,8 @@ func (monitor *Monitor) Start() {
 
 func (monitor *Monitor) updateUserStates() error {
 	resp, err := monitor.Client.GetStreams(&helix.StreamsParams{
-		Type:    "live",
-		UserIDs: monitor.UserIds,
+		Type:       "live",
+		UserLogins: monitor.UserIds,
 	})
 	if err != nil {
 		return err
