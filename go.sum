@@ -99,8 +99,8 @@ github.com/hashicorp/logutils v1.0.0/go.mod h1:QIAnNjmIWmVIIkWDTG1z5v++HQmx9WQRO
 github.com/hashicorp/mdns v1.0.0/go.mod h1:tL+uN++7HEJ6SQLQ2/p+z2pH24WQKWjBPkE0mNTz8vQ=
 github.com/hashicorp/memberlist v0.1.3/go.mod h1:ajVTdAv/9Im8oMAAj5G31PhhMCZJV2pPBoIllUwCN7I=
 github.com/hashicorp/serf v0.8.2/go.mod h1:6hOLApaqBFA1NXqRQAsxw9QxuDEvNxSQRwA/JwenrHc=
-github.com/jkoenig134/go-ts3 v1.0.5 h1:CDJHq8zYYEOTFMo9cupFrpshmA0uMuHqHItaYnrImOI=
-github.com/jkoenig134/go-ts3 v1.0.5/go.mod h1:ehQzYv5iTYrtkbO4OjLK4QDOk9XZotOS7aSyNoakl88=
+github.com/jkoenig134/go-ts3 v1.0.6 h1:4J4NNb9wVmWZTkD6XnRUrPT+LbYPpn8H5gt12AUeQNo=
+github.com/jkoenig134/go-ts3 v1.0.6/go.mod h1:ehQzYv5iTYrtkbO4OjLK4QDOk9XZotOS7aSyNoakl88=
 github.com/jkoenig134/schema v1.1.1 h1:Pn/v5i3bHVyQMDFNvjLs88W5MVcdHjdB2WAW5g5GsHE=
 github.com/jkoenig134/schema v1.1.1/go.mod h1:acCT4QqQtnPkykXU1wmyRCgW9D7joFxXVSyInwtDhJ4=
 github.com/jonboulle/clockwork v0.1.0/go.mod h1:Ii8DK3G1RaLaWxj9trq07+26W01tbo22gdxWY5EU2bo=

@@ -20,13 +20,13 @@ test:
 # builds and formats the project with the built-in Golang tool
 .PHONY: build
 build:
-	@go build -ldflags '${LD_FLAGS}' -o "${OUTPUT_PREFIX}-${GOOS}-${GOARCH}${OUTPUT_FILE_ENDING}" ./cmd/fumeping/*
+	@go build -ldflags '${LD_FLAGS}' -o "${OUTPUT_PREFIX}-${GOOS}-${GOARCH}${OUTPUT_FILE_ENDING}" ./cmd/${twitchtsbot}/*
 
 # build go application for docker usage
 .PHONY: build-docker
 build-docker:
-	@CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -a -installsuffix cgo -ldflags '${LD_FLAGS}' -o "${OUTPUT_PREFIX}-docker" ./cmd/fumeping/*
+	@CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -a -installsuffix cgo -ldflags '${LD_FLAGS}' -o "${OUTPUT_PREFIX}-docker" ./cmd/${twitchtsbot}/*
 
 # installs and formats the project with the built-in Golang tool
 install:
-	@go install -ldflags '${LD_FLAGS}' ./cmd/fumeping/*
+	@go install -ldflags '${LD_FLAGS}' ./cmd/${twitchtsbot}/*
