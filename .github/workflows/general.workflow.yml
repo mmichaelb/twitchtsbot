@@ -60,7 +60,7 @@ jobs:
         uses: softprops/action-gh-release@v1
         with:
           draft: false
-          prerelease: ${{ startsWith(github.ref, 'v0.') }}
+          prerelease: ${{ startsWith(github.ref, 'refs/tags/v0.') }}
           files: ./bin/*
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
