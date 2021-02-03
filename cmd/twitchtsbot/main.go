@@ -26,10 +26,13 @@ var (
 	configPath      = flag.String("config", "./config.yml", "Set the config file path.")
 	teamspeakClient ts3.TeamspeakHttpClient
 	helixClient     *helix.Client
+	GitVersion      string
+	GitBranch       string
 )
 
 func main() {
 	setLogLevel()
+	logrus.WithField("version", GitVersion).WithField("branch", GitBranch).Infoln("Starting up...")
 	setConfigDefaults()
 	loadConfigOrWriteDefault()
 	logrus.RegisterExitHandler(func() {
