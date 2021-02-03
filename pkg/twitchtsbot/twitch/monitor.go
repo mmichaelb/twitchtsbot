@@ -17,6 +17,7 @@ type StreamerStatus int
 const (
 	StreamerStatusOffline StreamerStatus = iota
 	StreamerStatusLive
+	changesRequired = 3
 )
 
 type UserState struct {
@@ -24,14 +25,20 @@ type UserState struct {
 	StreamerStatus StreamerStatus
 }
 
+type ChangeState struct {
+	Status StreamerStatus
+	Count  int
+}
+
 type Monitor struct {
 	*sync.Mutex
-	States     map[string]*UserState
-	Client     ApiClient
-	UserLogins []string
-	Interval   time.Duration
-	Context    context.Context
-	NotifyChan chan *UserState
+	States       map[string]*UserState
+	ChangeActive map[string]*ChangeState
+	Client       ApiClient
+	UserLogins   []string
+	Interval     time.Duration
+	Context      context.Context
+	NotifyChan   chan *UserState
 }
 
 func NewMonitor(client ApiClient, userLogins []string, interval time.Duration, context context.Context, notifyChan chan *UserState) *Monitor {
@@ -97,14 +104,26 @@ func (monitor *Monitor) updateStreamerStates(streams []helix.Stream) {
 			}
 		}
 		if state.StreamerStatus != fetchedStatus {
-			state.StreamerStatus = fetchedStatus
-			monitor.NotifyChan <- state
+			if changeStatus, ok := monitor.ChangeActive[state.UserLogin]; !ok {
+				monitor.ChangeActive[state.UserLogin] = &ChangeState{Status: fetchedStatus, Count: 1}
+				continue
+			} else if changeStatus.Status == fetchedStatus {
+				if changeStatus.Count >= changesRequired {
+					state.StreamerStatus = fetchedStatus
+					monitor.NotifyChan <- state
+				} else {
+					changeStatus.Count++
+					continue
+				}
+			}
+			delete(monitor.ChangeActive, state.UserLogin)
 		}
 	}
 }
 
 func (monitor *Monitor) initializeStreamerStates(streams []helix.Stream) {
 	monitor.States = make(map[string]*UserState, len(monitor.UserLogins))
+	monitor.ChangeActive = make(map[string]*ChangeState, len(monitor.UserLogins))
 	for _, userLogin := range monitor.UserLogins {
 		state := &UserState{
 			UserLogin:      userLogin,
