@@ -83,7 +83,7 @@ func (hook *TwitchUpdateHook) updateTeamspeakRank(clientDbId int, state *twitch.
 	var hasServerGroup bool
 	members, err := hook.TsClient.ServerGroupClientList(hook.ServerGroupId)
 	if err != nil {
-		logrus.WithError(err).WithField("serverGroupId", hook.ServerGroupId).Errorln("could not retrieve server group members")
+		Log.WithError(err).WithField("serverGroupId", hook.ServerGroupId).Errorln("could not retrieve server group members")
 		return
 	} else {
 		for _, member := range *members {

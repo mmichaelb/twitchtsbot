@@ -3,7 +3,6 @@ package twitch
 import (
 	"fmt"
 	"github.com/nicklaw5/helix"
-	"github.com/sirupsen/logrus"
 	"net/http"
 )
 
@@ -22,6 +21,6 @@ func RetrieveIDs(client ApiClient, names []string) ([]string, error) {
 	for _, user := range resp.Data.Users {
 		ids = append(ids, user.ID)
 	}
-	logrus.WithField("idCount", len(ids)).Debugln("Fetched Twitch User IDs!")
+	Log.WithField("idCount", len(ids)).Debugln("Fetched Twitch User IDs!")
 	return ids, nil
 }
