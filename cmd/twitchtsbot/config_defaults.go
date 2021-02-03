@@ -11,7 +11,7 @@ func setConfigDefaults() {
 	viper.SetDefault("teamspeak.serverid", 1)
 	viper.SetDefault("twitch.clientid", "<yourclientid>")
 	viper.SetDefault("twitch.appaccesstoken", "<yourtoken>")
-	viper.SetDefault("accounts", map[string]string{})
+	viper.SetDefault("accounts", []string{})
 	viper.SetDefault("interval", time.Second)
 	viper.SetDefault("servergroupid", -1)
 }
