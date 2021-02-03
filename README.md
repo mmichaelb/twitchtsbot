@@ -4,12 +4,12 @@
 [![GitHub](https://img.shields.io/github/license/mmichaelb/twitchtsbot)](https://github.com/mmichaelb/twitchtsbot/blob/main/LICENSE)
 [![GitHub release (latest SemVer including pre-releases)](https://img.shields.io/github/v/release/mmichaelb/twitchtsbot?include_prereleases&sort=semver)](https://github.com/mmichaelb/twitchtsbot/releases)
 
-This bot was developed in order to give users on a TeamSpeak Server a server group when they are live on twitch. This
-aims to solve the problem of users joining the channel without even knowing a channel member is streaming.
+This bot was developed in order to give users on a TeamSpeak Server a server group when they are live on twitch. It aims
+to solve the problem of users joining the channel without even knowing a channel member is streaming.
 
 ## Download
 
-The latest binary can be found and downloaded at the [releases page of this project](https://github.com/mmichaelb/twitchtsbot/releases).
+The latest binary can be found and downloaded at the [releases page of this repository](https://github.com/mmichaelb/twitchtsbot/releases).
 
 ## Usage
 
@@ -92,3 +92,5 @@ run the application like this:
 ```bash
 ./twitchtsbot
 ```
+
+There are various parameters which can be retrieved by running `./twitchtsbot -help`
