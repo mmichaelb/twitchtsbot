@@ -31,6 +31,7 @@ var (
 )
 
 func main() {
+	flag.Parse()
 	setLogLevel()
 	logrus.WithField("version", GitVersion).WithField("branch", GitBranch).Infoln("Starting up...")
 	setConfigDefaults()
