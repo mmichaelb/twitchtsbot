@@ -90,7 +90,7 @@ func TestMonitor_GetState(t *testing.T) {
 	testutil.WaitForMethodCall(t, &mockClient.Mock, "GetStreams", 1, 10, time.Millisecond*400)
 	state, ok := monitor.GetState(testStreamId1)
 	assert.True(t, ok, "expected GetState to return state")
-	assert.Equal(t, state.ID, testStreamId1, "expected GetState to return correct state id")
+	assert.Equal(t, state.UserLogin, testStreamId1, "expected GetState to return correct state login name")
 	assert.Equal(t, state.StreamerStatus, StreamerStatusLive, "expected GetState to return streamer live status")
 }
 
@@ -133,8 +133,8 @@ func TestMonitor_StartClientError(t *testing.T) {
 func assertStreamerStates(t *testing.T, notifyChan chan *UserState, statusMap map[string]StreamerStatus) {
 	for i := 0; i < len(statusMap); i++ {
 		state := <-notifyChan
-		expectedStatus, ok := statusMap[state.ID]
-		assert.Truef(t, ok, "unexpected user state from notifyChan: %s", state.ID)
-		assert.Equalf(t, expectedStatus, state.StreamerStatus, "unexpected streamer status from id %s", state.ID)
+		expectedStatus, ok := statusMap[state.UserLogin]
+		assert.Truef(t, ok, "unexpected user state from notifyChan: %s", state.UserLogin)
+		assert.Equalf(t, expectedStatus, state.StreamerStatus, "unexpected streamer status from user login %s", state.UserLogin)
 	}
 }

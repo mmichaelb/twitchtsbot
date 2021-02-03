@@ -7,6 +7,7 @@ import (
 	"github.com/nicklaw5/helix"
 	"github.com/sirupsen/logrus"
 	"net/http"
+	"strings"
 	"sync"
 	"time"
 )
@@ -19,7 +20,7 @@ const (
 )
 
 type UserState struct {
-	ID             string
+	UserLogin      string
 	StreamerStatus StreamerStatus
 }
 
@@ -27,17 +28,17 @@ type Monitor struct {
 	*sync.Mutex
 	States     map[string]*UserState
 	Client     ApiClient
-	UserIds    []string
+	UserLogins []string
 	Interval   time.Duration
 	Context    context.Context
 	NotifyChan chan *UserState
 }
 
-func NewMonitor(client ApiClient, userIds []string, interval time.Duration, context context.Context, notifyChan chan *UserState) *Monitor {
+func NewMonitor(client ApiClient, userLogins []string, interval time.Duration, context context.Context, notifyChan chan *UserState) *Monitor {
 	monitor := &Monitor{
 		Mutex:      &sync.Mutex{},
 		Client:     client,
-		UserIds:    userIds,
+		UserLogins: userLogins,
 		Interval:   interval,
 		Context:    context,
 		NotifyChan: notifyChan,
@@ -47,12 +48,9 @@ func NewMonitor(client ApiClient, userIds []string, interval time.Duration, cont
 
 func (monitor *Monitor) Start() {
 	Log.WithFields(logrus.Fields{
-		"interval":     monitor.Interval.String(),
-		"userIdNumber": len(monitor.UserIds),
+		"interval":        monitor.Interval.String(),
+		"userLoginNumber": len(monitor.UserLogins),
 	}).Infoln("Starting Twitch stream monitor")
-	defer func() {
-		Log.Infoln("Stopped Twitch stream monitor.")
-	}()
 	go func() {
 		for {
 			select {
@@ -70,7 +68,7 @@ func (monitor *Monitor) Start() {
 func (monitor *Monitor) updateUserStates() error {
 	resp, err := monitor.Client.GetStreams(&helix.StreamsParams{
 		Type:       "live",
-		UserLogins: monitor.UserIds,
+		UserLogins: monitor.UserLogins,
 	})
 	if err != nil {
 		return err
@@ -91,10 +89,10 @@ func (monitor *Monitor) updateStreamerStates(streams []helix.Stream) {
 		return
 	}
 	// check for default states
-	for userId, state := range monitor.States {
+	for userLogin, state := range monitor.States {
 		fetchedStatus := StreamerStatusOffline
 		for _, stream := range streams {
-			if stream.UserID == userId {
+			if strings.EqualFold(stream.UserName, userLogin) {
 				fetchedStatus = StreamerStatusLive
 			}
 		}
@@ -106,25 +104,25 @@ func (monitor *Monitor) updateStreamerStates(streams []helix.Stream) {
 }
 
 func (monitor *Monitor) initializeStreamerStates(streams []helix.Stream) {
-	monitor.States = make(map[string]*UserState, len(monitor.UserIds))
-	for _, userId := range monitor.UserIds {
+	monitor.States = make(map[string]*UserState, len(monitor.UserLogins))
+	for _, userLogin := range monitor.UserLogins {
 		state := &UserState{
-			ID:             userId,
+			UserLogin:      userLogin,
 			StreamerStatus: StreamerStatusOffline,
 		}
 		for _, stream := range streams {
-			if stream.UserID == userId {
+			if strings.EqualFold(stream.UserName, userLogin) {
 				state.StreamerStatus = StreamerStatusLive
 			}
 		}
-		monitor.States[userId] = state
+		monitor.States[userLogin] = state
 		monitor.NotifyChan <- state
 	}
 }
 
-func (monitor *Monitor) GetState(id string) (*UserState, bool) {
+func (monitor *Monitor) GetState(userLogin string) (*UserState, bool) {
 	monitor.Lock()
 	defer monitor.Unlock()
-	state, ok := monitor.States[id]
+	state, ok := monitor.States[userLogin]
 	return state, ok
 }
