@@ -6,11 +6,9 @@ GIT_DEFAULT_BRANCH=main
 
 LD_FLAGS = -X main.GitVersion=${GIT_VERSION} -X main.GitBranch=${GIT_BRANCH}
 
-OUTPUT_SUFFIX=$(go env GOEXE)
-
 OUTPUT_PREFIX=./bin/${PROJECT_NAME}-${GIT_VERSION}
 
-OUTPUT_SUFFIX=$(go env GOEXE)
+OUTPUT_SUFFIX=$(shell go env GOEXE)
 
 # tests project with the built-in Golang tool
 .PHONY: build
@@ -20,7 +18,7 @@ test:
 # builds and formats the project with the built-in Golang tool
 .PHONY: build
 build:
-	@go build -ldflags '${LD_FLAGS}' -o "${OUTPUT_PREFIX}-${GOOS}-${GOARCH}${OUTPUT_FILE_ENDING}" ./cmd/${twitchtsbot}/*
+	@go build -ldflags '${LD_FLAGS}' -o "${OUTPUT_PREFIX}-${GOOS}-${GOARCH}${OUTPUT_SUFFIX}" ./cmd/${twitchtsbot}/*
 
 # build go application for docker usage
 .PHONY: build-docker
