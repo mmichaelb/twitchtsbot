@@ -14,8 +14,8 @@ import (
 )
 
 const (
-	testStreamId1 = "1"
-	testStreamId2 = "2"
+	testStreamLogin1 = "1"
+	testStreamLogin2 = "2"
 )
 
 var (
@@ -25,62 +25,62 @@ var (
 func TestMonitor_StartSingleStream(t *testing.T) {
 	mockClient := new(testApiClient)
 	response := defaultOkStreamsResponse
-	response.Data.Streams = []helix.Stream{{UserID: testStreamId1}}
+	response.Data.Streams = []helix.Stream{{UserName: testStreamLogin1}}
 	mockClient.On("GetStreams", &helix.StreamsParams{
-		UserIDs: []string{testStreamId1},
-		Type:    "live",
+		UserLogins: []string{testStreamLogin1},
+		Type:       "live",
 	}).Return(&response, nil)
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 	notifyChan := make(chan *UserState)
 	defer close(notifyChan)
-	monitor := NewMonitor(mockClient, []string{testStreamId1}, time.Second, ctx, notifyChan)
+	monitor := NewMonitor(mockClient, []string{testStreamLogin1}, time.Second, ctx, notifyChan)
 	go monitor.Start()
-	assertStreamerStates(t, notifyChan, map[string]StreamerStatus{testStreamId1: StreamerStatusLive})
+	assertStreamerStates(t, notifyChan, map[string]StreamerStatus{testStreamLogin1: StreamerStatusLive})
 	response.Data.Streams = nil
-	assertStreamerStates(t, notifyChan, map[string]StreamerStatus{testStreamId1: StreamerStatusOffline})
+	assertStreamerStates(t, notifyChan, map[string]StreamerStatus{testStreamLogin1: StreamerStatusOffline})
 }
 
 func TestMonitor_StartMultipleStreams(t *testing.T) {
 	mockClient := new(testApiClient)
 	response := defaultOkStreamsResponse
-	response.Data.Streams = []helix.Stream{{UserID: testStreamId1}}
+	response.Data.Streams = []helix.Stream{{UserName: testStreamLogin1}}
 	mockClient.On("GetStreams", &helix.StreamsParams{
-		UserIDs: []string{testStreamId1, testStreamId2},
-		Type:    "live",
+		UserLogins: []string{testStreamLogin1, testStreamLogin2},
+		Type:       "live",
 	}).Return(&response, nil)
-	response.Data.Streams = []helix.Stream{{UserID: testStreamId1}}
+	response.Data.Streams = []helix.Stream{{UserName: testStreamLogin1}}
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 	notifyChan := make(chan *UserState)
 	defer close(notifyChan)
-	monitor := NewMonitor(mockClient, []string{testStreamId1, testStreamId2}, time.Second, ctx, notifyChan)
+	monitor := NewMonitor(mockClient, []string{testStreamLogin1, testStreamLogin2}, time.Second, ctx, notifyChan)
 	go monitor.Start()
 	assertStreamerStates(t, notifyChan, map[string]StreamerStatus{
-		testStreamId1: StreamerStatusLive,
-		testStreamId2: StreamerStatusOffline,
+		testStreamLogin1: StreamerStatusLive,
+		testStreamLogin2: StreamerStatusOffline,
 	})
-	response.Data.Streams = []helix.Stream{{UserID: testStreamId2}}
+	response.Data.Streams = []helix.Stream{{UserName: testStreamLogin2}}
 	assertStreamerStates(t, notifyChan, map[string]StreamerStatus{
-		testStreamId1: StreamerStatusOffline,
-		testStreamId2: StreamerStatusLive,
+		testStreamLogin1: StreamerStatusOffline,
+		testStreamLogin2: StreamerStatusLive,
 	})
 }
 
 func TestMonitor_GetState(t *testing.T) {
 	mockClient := new(testApiClient)
 	response := defaultOkStreamsResponse
-	response.Data.Streams = []helix.Stream{{UserID: testStreamId1}}
+	response.Data.Streams = []helix.Stream{{UserName: testStreamLogin1}}
 	mockClient.On("GetStreams", &helix.StreamsParams{
-		UserIDs: []string{testStreamId1, testStreamId2},
-		Type:    "live",
+		UserLogins: []string{testStreamLogin1, testStreamLogin2},
+		Type:       "live",
 	}).Return(&response, nil)
-	response.Data.Streams = []helix.Stream{{UserID: testStreamId1}}
+	response.Data.Streams = []helix.Stream{{UserName: testStreamLogin1}}
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 	notifyChan := make(chan *UserState)
 	defer close(notifyChan)
-	monitor := NewMonitor(mockClient, []string{testStreamId1, testStreamId2}, time.Second, ctx, notifyChan)
+	monitor := NewMonitor(mockClient, []string{testStreamLogin1, testStreamLogin2}, time.Second, ctx, notifyChan)
 	go monitor.Start()
 	go func() {
 		for {
@@ -88,9 +88,9 @@ func TestMonitor_GetState(t *testing.T) {
 		}
 	}()
 	testutil.WaitForMethodCall(t, &mockClient.Mock, "GetStreams", 1, 10, time.Millisecond*400)
-	state, ok := monitor.GetState(testStreamId1)
+	state, ok := monitor.GetState(testStreamLogin1)
 	assert.True(t, ok, "expected GetState to return state")
-	assert.Equal(t, state.UserLogin, testStreamId1, "expected GetState to return correct state login name")
+	assert.Equal(t, state.UserLogin, testStreamLogin1, "expected GetState to return correct state login name")
 	assert.Equal(t, state.StreamerStatus, StreamerStatusLive, "expected GetState to return streamer live status")
 }
 
@@ -101,13 +101,13 @@ func TestMonitor_StartInvalidCode(t *testing.T) {
 	response := defaultOkStreamsResponse
 	response.StatusCode = http.StatusInternalServerError
 	mockClient.On("GetStreams", &helix.StreamsParams{
-		UserIDs: []string{testStreamId1, testStreamId2},
-		Type:    "live",
+		UserLogins: []string{testStreamLogin1, testStreamLogin2},
+		Type:       "live",
 	}).Return(&response, nil)
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 	notifyChan := make(chan *UserState)
-	monitor := NewMonitor(mockClient, []string{testStreamId1, testStreamId2}, time.Second, ctx, notifyChan)
+	monitor := NewMonitor(mockClient, []string{testStreamLogin1, testStreamLogin2}, time.Second, ctx, notifyChan)
 	go monitor.Start()
 	testutil.WaitForMethodCall(t, &mockClient.Mock, "GetStreams", 1, 10, time.Millisecond*400)
 	assert.Equal(t, logrus.ErrorLevel, hook.LastEntry().Level, "last entry level should be of type ErrorLevel")
@@ -118,13 +118,13 @@ func TestMonitor_StartClientError(t *testing.T) {
 	Log = logger
 	mockClient := new(testApiClient)
 	mockClient.On("GetStreams", &helix.StreamsParams{
-		UserIDs: []string{testStreamId1, testStreamId2},
-		Type:    "live",
+		UserLogins: []string{testStreamLogin1, testStreamLogin2},
+		Type:       "live",
 	}).Return(nil, errors.New("test error"))
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 	notifyChan := make(chan *UserState)
-	monitor := NewMonitor(mockClient, []string{testStreamId1, testStreamId2}, time.Second, ctx, notifyChan)
+	monitor := NewMonitor(mockClient, []string{testStreamLogin1, testStreamLogin2}, time.Second, ctx, notifyChan)
 	go monitor.Start()
 	testutil.WaitForMethodCall(t, &mockClient.Mock, "GetStreams", 1, 10, time.Millisecond*400)
 	assert.Equal(t, logrus.ErrorLevel, hook.LastEntry().Level)
