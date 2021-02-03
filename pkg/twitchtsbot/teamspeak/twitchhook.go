@@ -41,7 +41,7 @@ func (hook *TwitchUpdateHook) Start() error {
 				return
 			case state := <-hook.NotifyChan:
 				go func() {
-					teamspeakDatabaseId, ok := hook.retrieveTeamspeakDatabaseId(state.ID)
+					teamspeakDatabaseId, ok := hook.retrieveTeamspeakDatabaseId(state.UserLogin)
 					if !ok {
 						return
 					}
@@ -100,7 +100,7 @@ func (hook *TwitchUpdateHook) updateTeamspeakRank(clientDbId int, state *twitch.
 	}
 	if !add && !hasServerGroup {
 		Log.WithFields(logrus.Fields{"clientDbId": clientDbId, "serverGroupId": hook.ServerGroupId}).
-			Infoln("client does not have the server group which should be removed")
+			Traceln("client does not have the server group which should be removed")
 		return
 	}
 	if add {
