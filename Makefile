@@ -1,6 +1,6 @@
 PROJECT_NAME=twitchtsbot
 
-GIT_VERSION=$(shell git describe --always)
+GIT_VERSION=$(shell git describe --tags --always)
 GIT_BRANCH=$(shell git branch --show-current)
 GIT_DEFAULT_BRANCH=main
 
