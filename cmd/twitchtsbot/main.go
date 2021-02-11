@@ -13,7 +13,6 @@ import (
 	"os"
 	"os/signal"
 	"strconv"
-	"strings"
 	"syscall"
 )
 
@@ -120,15 +119,13 @@ func initializeTeamspeakQueryClient() {
 }
 
 func loadTwitchAccountPairs() map[int]string {
-	pairs := viper.GetStringSlice("accounts")
+	var accounts []*accountEntry
+	if err := viper.UnmarshalKey("accounts", &accounts); err != nil {
+		logrus.WithError(err).Fatalln("Could not load account pairs.")
+	}
 	fetchedPairs := make(map[int]string)
-	for _, entry := range pairs {
-		entrySplit := strings.SplitN(entry, "/", 2)
-		if len(entrySplit) != 2 {
-			logrus.WithField("accountEntry", entry).Warnln("Could not split account entry on slash (\"/\").")
-			continue
-		}
-		fetchPair(fetchedPairs, entrySplit[0], entrySplit[1])
+	for _, account := range accounts {
+		fetchPair(fetchedPairs, account.TsIdentifier, account.TwitchUsername)
 	}
 	logrus.WithField("pairAmount", len(fetchedPairs)).Infoln("Fetched account pairs.")
 	return fetchedPairs

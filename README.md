@@ -27,8 +27,10 @@ Sets the account pairs to check for. Format has to match the following syntax: `
 #### Example
 ```yaml
 accounts:
-- '++auniqueteamspeakid#/testuserontwitch'
-- '42/anothertestuserontwitch'
+- ts: 'auniqueteamspeakid'
+  twitch: 'testuserontwitch'
+- ts: '42'
+  twitch: 'anothertestuserontwitch'
 ```
 </details>
 
